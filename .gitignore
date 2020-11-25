@@ -15,3 +15,5 @@ src/main/java/.DS_Store
 src/main/java/com/.DS_Store
 src/main/java/com/github/.DS_Store
 src/main/java/com/github/kafka/.DS_Store
+*.xmi
+src/.DS_Store
