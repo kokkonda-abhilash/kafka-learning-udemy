@@ -27,7 +27,7 @@ public class ConsumerDemo {
 		properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
 		properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 		
-		KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(properties);
+		final KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(properties);
 		consumer.subscribe(Arrays.asList(topic));
 		
 		while (true) {
