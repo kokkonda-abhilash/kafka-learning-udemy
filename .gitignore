@@ -1,19 +1,14 @@
 target/
-pom.xml.tag
-pom.xml.releaseBackup
-pom.xml.versionsBackup
-pom.xml.next
-release.properties
-dependency-reduced-pom.xml
-buildNumber.properties
-.mvn/timing.properties
-# https://github.com/takari/maven-wrapper#usage-without-binary-jar
-.mvn/wrapper/maven-wrapper.jar
+.DS_Store
+src/.DS_Store
 src/main/.DS_Store
 src/main/.DS_Store
 src/main/java/.DS_Store
 src/main/java/com/.DS_Store
 src/main/java/com/github/.DS_Store
 src/main/java/com/github/kafka/.DS_Store
-*.xmi
-src/.DS_Store
+*.class
+.metadata/
+.project
+.classpath
+.settings/
