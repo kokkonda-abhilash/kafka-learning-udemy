@@ -1,5 +1,6 @@
 package com.github.kafka.twitter;
 
+import java.beans.PropertyChangeEvent;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
@@ -109,9 +110,9 @@ public class TwitterProducer {
 	
 	private KafkaProducer<String, String> createKafkaProducer() {
 		Properties properties = new Properties();
-		properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "https://localhost:9092");
-		properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-		properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+		properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "https://localhost:9092");
+		properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+		properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 		
 		/**
 		 * SAFE PRODUCER: Creating an idempotent producer
@@ -128,10 +129,18 @@ public class TwitterProducer {
 		 * 		- Keeps the ordering and improved performance
 		 * 		- Idempotent producer might have a performance latency
 		 */
-		properties.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
-		properties.put(ProducerConfig.ACKS_CONFIG, "all");
-		properties.put(ProducerConfig.RETRIES_CONFIG, Integer.toString(Integer.MAX_VALUE));
-		properties.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 5);
+		properties.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
+		properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
+		properties.setProperty(ProducerConfig.RETRIES_CONFIG, Integer.toString(Integer.MAX_VALUE));
+		properties.setProperty(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "5");
+		
+		/**
+		 * HIGH THROUGHPUT PRODUCER
+		 * Snappy is a super algorithm for text based messages like JSON (Made by google)
+		 */
+		properties.setProperty(ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy");
+		properties.setProperty(ProducerConfig.LINGER_MS_CONFIG, "20");
+		properties.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, Integer.toString(32));
 
 		return new KafkaProducer<String, String>(properties);
 	}
