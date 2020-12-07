@@ -22,5 +22,6 @@
 	<modules>
 		<module>kafka-basics</module>
 		<module>kafka-twitter-basics</module>
+		<module>kafka-consumer-elasticsearch</module>
 	</modules>
 </project>
