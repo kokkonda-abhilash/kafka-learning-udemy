@@ -1,5 +1,6 @@
 package com.github.kafka;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Properties;
@@ -52,7 +53,7 @@ public class ElasticSearchConsumer {
 		return client;
 	}
 
-	public static void main(String args[]) {
+	public static void main(String args[]) throws IOException {
 		KafkaConsumer<String, String> consumer = creatKafkaConsumer("twitter");
 		RestHighLevelClient client = createClient();
 		while (true) {
