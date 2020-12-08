@@ -26,9 +26,12 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.JsonParser;
+
 public class ElasticSearchConsumer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchConsumer.class);
+	private static final JsonParser JSON_PARSER = new JsonParser();
 
 	public static RestHighLevelClient createClient() {
 		// https://znlso4jszp:llxxwpxxey@kafka-udemy-tutorial-9493704951.eu-west-1.bonsaisearch.net:443
@@ -55,9 +58,11 @@ public class ElasticSearchConsumer {
 		while (true) {
 			ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
 			for(ConsumerRecord<String, String> record: records) {
+				String id = extractIdFromTweet(record.value());
 				IndexRequest request = new IndexRequest(
 						"twitter",	// Index
 						"tweets"		// Type
+						id	// To make consumer offset commit idempotent
 						).source(record, XContentType.JSON);
 				try {
 					IndexResponse response = client.index(request, RequestOptions.DEFAULT);
@@ -88,5 +93,13 @@ public class ElasticSearchConsumer {
 		consumer.subscribe(Arrays.asList(topic));
 
 		return consumer;
+	}
+	
+	private static String extractIdFromTweet(String tweetJson) {
+		// Extracting values from JSON using GSON
+		return JSON_PARSER.parse(tweetJson)
+		.getAsJsonObject()
+		.get("id")
+		.getAsString();
 	}
 }
