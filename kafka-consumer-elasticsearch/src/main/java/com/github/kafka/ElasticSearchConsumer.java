@@ -44,7 +44,10 @@ public class ElasticSearchConsumer {
 	public static void main(String args[]) {
 		String jsonString = "{\"foo\": \"bar\"}";
 		RestHighLevelClient client = createClient();
-		IndexRequest request = new IndexRequest("twitter", "tweets").source(jsonString, XContentType.JSON);
+		IndexRequest request = new IndexRequest(
+			"twitter",	// Index
+			"tweets"		// Type
+		).source(jsonString, XContentType.JSON);
 		try {
 			IndexResponse response = client.index(request, RequestOptions.DEFAULT);
 			String id = response.getId();
