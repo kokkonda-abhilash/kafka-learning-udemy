@@ -1,6 +1,5 @@
 package com.github.kafka;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Properties;
@@ -16,8 +15,9 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
@@ -58,13 +58,20 @@ public class ElasticSearchConsumer {
 		while (true) {
 			ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
 			LOGGER.info("Received " + records.count() + " records");
+			BulkRequest bulkRequest = new BulkRequest();	// For batch processing of the data
+
 			for(ConsumerRecord<String, String> record: records) {
 				String id = extractIdFromTweet(record.value());
 				IndexRequest request = new IndexRequest(
 						"twitter",	// Index
-						"tweets"		// Type
+						"tweets"	,	// Type
 						id	// To make consumer offset commit idempotent
 						).source(record, XContentType.JSON);
+				bulkRequest.add(request);
+			/**
+			 * Making use of bulk request for batch processing
+			 */
+			/*	
 				try {
 					IndexResponse response = client.index(request, RequestOptions.DEFAULT);
 					String responseId = response.getId();
@@ -74,6 +81,8 @@ public class ElasticSearchConsumer {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+			*/
+				BulkResponse response = client.bulk(bulkRequest, RequestOptions.DEFAULT);
 				LOGGER.info("Committing offsets...");
 				consumer.commitSync();	// Synchronous and manual commit of offsets
 				LOGGER.info("Offsets committed!");
@@ -82,7 +91,7 @@ public class ElasticSearchConsumer {
 	}
 
 	private static KafkaConsumer<String, String> creatKafkaConsumer(String topic) {
-		// Just copy from the kafka basics consumer class
+		// Just copy from the Kafka basics consumer class
 
 		String bootstrapServer = "localhost:9092";
 		String groupId = "tweets";
@@ -93,7 +102,9 @@ public class ElasticSearchConsumer {
 		properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
 		properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 		
-		properties.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "10");	// To control the number of records for consumer to handle
+		// properties.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "10");	// To control the number of records for consumer to handle
+		properties.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "100");	// For bulk request
+		
 		properties.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false"); // This is to make the offset commits at-least once which is synchronous commits
 		
 		KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(properties);
